@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
 
-export const dynamic = 'force-static'
- 
-export async function GET(request: NextRequest) {
-    const response = {
-        message: 'ㅎㅎㅎ',
-        data: 'zzz'
-    }
+export const dynamic = "force-static";
 
-    return NextResponse.json(response, { status: 200 });
+export async function GET(request: NextRequest) {
+  const response = {
+    message: "ㅎㅎㅎ",
+    data: "zzz",
+  };
+
+  return NextResponse.json(response, { status: 200 });
 }
