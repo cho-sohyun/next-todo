@@ -2,7 +2,7 @@ import { title } from "@/components/primitives";
 import TodosTable from "@/components/todos-table";
 
 async function fetchTodosApi() {
-  const res = await fetch("http://localhost:3000/api/todos/", {
+  const res = await fetch(`${process.env.BASE_URL}/api/todos/`, {
     cache: "no-store", // 항상 최신 데이터 가져옴
   });
 

@@ -21,14 +21,14 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
         <TableColumn>완료여부</TableColumn>
         <TableColumn>생성일</TableColumn>
       </TableHeader>
-      <TableBody>
+      <TableBody emptyContent={"할일을 추가해주세요."}>
         {todos &&
-          todos.map((todo: Todo) => (
-            <TableRow key="1">
-              <TableCell>1</TableCell>
-              <TableCell>빨래하기</TableCell>
-              <TableCell>완료</TableCell>
-              <TableCell>오늘</TableCell>
+          todos.map((aTodo: Todo) => (
+            <TableRow key={aTodo.id}>
+              <TableCell>{aTodo.id.slice(0, 4)}</TableCell>
+              <TableCell>{aTodo.title}</TableCell>
+              <TableCell>{aTodo.is_done ? "✅" : "☑️"}</TableCell>
+              <TableCell>{`${aTodo.created_at}`}</TableCell>
             </TableRow>
           ))}
       </TableBody>
