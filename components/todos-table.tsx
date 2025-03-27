@@ -15,17 +15,22 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Spinner,
 } from "@heroui/react";
 import { useState } from "react";
+import { Bounce, ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { Todo } from "@/types";
-
 const TodosTable = ({ todos }: { todos: Todo[] }) => {
   // 할일 추가 가능 여부 state
   const [todoAddEnable, setTodoAddEnable] = useState(false);
 
   // 입력된 할일 state
   const [newTodoInput, setNewTodoInput] = useState("");
+
+  // 로딩상태
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // 로컬 상태로 할일 목록 관리
   const [optimisticTodos, setOptimisticTodos] = useState<Todo[]>(todos);
@@ -36,6 +41,7 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
 
       return;
     }
+    setIsLoading(true);
 
     const newTodo: Todo = {
       id: Date.now().toString(), // 임시 ID
@@ -65,8 +71,12 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
       }
       console.log(`할일 추가 완료 : ${newTodoInput}`);
       setNewTodoInput("");
+      notify();
     } catch (error) {
       console.error("오류");
+    } finally {
+      setIsLoading(false);
+      setTodoAddEnable(false);
     }
   };
 
@@ -88,8 +98,23 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
     );
   };
 
+  const notify = () => toast.success("할일이 성공적으로 추가되었습니다!");
+
   return (
-    <>
+    <div className="flex flex-col space-y-2">
+      <ToastContainer
+        draggable
+        pauseOnFocusLoss
+        pauseOnHover
+        autoClose={1800}
+        closeOnClick={false}
+        hideProgressBar={false}
+        newestOnTop={false}
+        position="top-right"
+        rtl={false}
+        theme="dark"
+        transition={Bounce}
+      />
       <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
         <Input
           label="새로운 할일"
@@ -103,14 +128,21 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
           }}
         />
         {todoAddEnable ? (
-          <Button className="h-14" color="warning" onPress={addATodoHandler}>
+          <Button
+            className="h-14"
+            color="warning"
+            isDisabled={isLoading}
+            onPress={addATodoHandler}
+          >
             추가
           </Button>
         ) : (
           DisabledTodoAddTooltip()
         )}
       </div>
-
+      <div className="h-6">
+        {isLoading && <Spinner color="warning" size="sm" />}
+      </div>
       <Table aria-label="Example static collection table">
         <TableHeader>
           <TableColumn>아이디</TableColumn>
@@ -125,12 +157,14 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
                 <TableCell>{aTodo.id.slice(0, 4)}</TableCell>
                 <TableCell>{aTodo.title}</TableCell>
                 <TableCell>{aTodo.is_done ? "✅" : "☑️"}</TableCell>
-                <TableCell>{aTodo.created_at.toISOString()}</TableCell>
+                <TableCell>
+                  {new Date(aTodo.created_at).toLocaleDateString("ko-KR")}
+                </TableCell>
               </TableRow>
             ))}
         </TableBody>
       </Table>
-    </>
+    </div>
   );
 };
 
