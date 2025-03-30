@@ -16,9 +16,15 @@ import {
   PopoverContent,
   PopoverTrigger,
   Spinner,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
 } from "@heroui/react";
 import { useState } from "react";
 import { Bounce, ToastContainer, toast } from "react-toastify";
+
+import { VerticalDotsIcon } from "./icons";
 import "react-toastify/dist/ReactToastify.css";
 
 import { Todo } from "@/types";
@@ -149,6 +155,7 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
           <TableColumn>할일내용</TableColumn>
           <TableColumn>완료여부</TableColumn>
           <TableColumn>생성일</TableColumn>
+          <TableColumn>액션</TableColumn>
         </TableHeader>
         <TableBody emptyContent={"할일을 추가해주세요."}>
           {optimisticTodos &&
@@ -159,6 +166,27 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
                 <TableCell>{aTodo.is_done ? "✅" : "☑️"}</TableCell>
                 <TableCell>
                   {new Date(aTodo.created_at).toLocaleDateString("ko-KR")}
+                </TableCell>
+                <TableCell>
+                  <div className="relative flex justify-end items-center gap-2">
+                    <Dropdown className="bg-background border-1 border-default-200">
+                      <DropdownTrigger>
+                        <Button
+                          isIconOnly
+                          radius="full"
+                          size="sm"
+                          variant="light"
+                        >
+                          <VerticalDotsIcon className="text-default-400" />
+                        </Button>
+                      </DropdownTrigger>
+                      <DropdownMenu>
+                        <DropdownItem key="view">상세보기</DropdownItem>
+                        <DropdownItem key="edit">수정</DropdownItem>
+                        <DropdownItem key="delete">삭제</DropdownItem>
+                      </DropdownMenu>
+                    </Dropdown>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
