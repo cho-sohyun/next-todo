@@ -82,75 +82,70 @@ export async function addATodo({ title }) {
   };
 }
 
-// 단일 할일 조회
 export async function fetchATodo({ id }) {
-  if (id === null) {
-    return null;
+  if (!id) {
+    throw new Error("fetchATodo: id가 제공되지 않았습니다.");
   }
+
+  console.log("fetchATodo id:", id); // 디버깅 로그
 
   try {
     const todoDocRef = doc(db, "todos", id);
     const todoDocSnap = await getDoc(todoDocRef);
 
     if (todoDocSnap.exists()) {
-      console.log("Document data:", todoDocSnap.data());
-
-      const todoData = todoDocSnap.data(); // Firestore 문서 데이터 가져오기
-
-      const fetchedTodo = {
-        id: todoDocSnap.id, // 문서 ID
-        title: todoData.title || "제목 없음", // undefined 방지
-        is_done: todoData.is_done ?? false, // undefined 방지
-        created_at: todoData.created_at?.toDate() || new Date(),
-      };
-
-      return fetchedTodo;
+      return { id: todoDocSnap.id, ...todoDocSnap.data() };
     } else {
-      console.log("No such document");
-
-      return null;
+      throw new Error("할일을 찾을 수 없습니다.");
     }
   } catch (error) {
     console.error("Error fetching todo:", error);
-
-    return null;
+    throw error;
   }
 }
 
 // 단일 할일 삭제
 export async function deleteATodo({ id }) {
-  const fetchedTodo = await fetchATodo(id);
+  if (!id) {
+    throw new Error("deleteATodo: id가 제공되지 않았습니다.");
+  }
 
-  if (fetchedTodo === null) {
+  console.log("deleteATodo id:", id); // 디버깅 로그
+
+  const fetchedTodo = await fetchATodo({ id });
+
+  if (!fetchedTodo) {
+    console.error("deleteATodo: 할일을 찾을 수 없습니다.");
+
     return null;
   }
 
   await deleteDoc(doc(db, "todos", id));
 
+  console.log("deleteATodo: 삭제 완료");
+
   return fetchedTodo;
 }
 
 // 단일 할일 수정
-export async function editATodo(id, { title, is_done }) {
-  const fetchedTodo = await fetchATodo(id);
-
-  if (fetchedTodo === null) {
-    return null;
+export async function editATodo(id, data) {
+  if (!id) {
+    throw new Error("editATodo: id가 제공되지 않았습니다.");
   }
 
-  const todoRef = doc(db, "todos", id);
+  console.log("editATodo id:", id); // 디버깅 로그
+  console.log("editATodo data:", data); // 디버깅 로그
 
-  await updateDoc(todoRef, {
-    title: title,
-    is_done: is_done,
-  });
+  try {
+    const todoDocRef = doc(db, "todos", id);
 
-  return {
-    id: id,
-    title: title,
-    is_done: is_done,
-    created_at: fetchedTodo.created_at,
-  };
+    await updateDoc(todoDocRef, data);
+
+    return await fetchATodo({ id });
+  } catch (error) {
+    console.error("editATodo: 서버 오류 발생", error);
+    throw error;
+  }
 }
 
 export default { fetchTodos, addATodo, fetchATodo, deleteATodo, editATodo };
