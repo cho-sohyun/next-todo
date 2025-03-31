@@ -5,15 +5,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { fetchATodo, deleteATodo, editATodo } from "@/data/firestore";
 
 // 할일 단일 조회
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  const { slug } = await params;
-  const fetchedTodo = await fetchATodo({ id: slug });
+export async function GET(request: NextRequest, context: any) {
+  const { params } = context;
+
+  console.log("GET params.slug:", params?.slug); // 디버깅 로그
+
+  if (!params?.slug) {
+    console.error("GET: params.slug가 제공되지 않았습니다.");
+
+    return NextResponse.json({ error: "Slug is missing" }, { status: 400 });
+  }
+
+  const fetchedTodo = await fetchATodo({ id: params.slug });
 
   if (!fetchedTodo) {
-    return new Response(null, { status: 204 });
+    return NextResponse.json(
+      { error: "할일을 찾을 수 없습니다." },
+      { status: 404 }
+    );
   }
 
   return NextResponse.json(
@@ -23,13 +32,12 @@ export async function GET(
 }
 
 // 할일 단일 삭제 id
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
-  console.log("DELETE params.slug:", params.slug); // 디버깅 로그
+export async function DELETE(request: NextRequest, context: any) {
+  const { params } = context;
 
-  if (!params.slug) {
+  console.log("DELETE params.slug:", params?.slug); // 디버깅 로그
+
+  if (!params?.slug) {
     console.error("DELETE: params.slug가 제공되지 않았습니다.");
 
     return NextResponse.json({ error: "Slug is missing" }, { status: 400 });
@@ -64,10 +72,7 @@ export async function DELETE(
 }
 
 // 할일 단일 수정 id
-export async function POST(
-  request: NextRequest,
-  context: { params: { slug: string } }
-) {
+export async function POST(request: NextRequest, context: any) {
   const { params } = context;
 
   console.log("POST params:", params); // 디버깅 로그
@@ -76,16 +81,19 @@ export async function POST(
 
   console.log("POST request body:", { title, is_done }); // 디버깅 로그
 
-  if (!params.slug) {
+  if (!params?.slug) {
     console.error("POST: params.slug가 제공되지 않았습니다.");
 
-    return new Response("Slug is missing", { status: 400 });
+    return NextResponse.json({ error: "Slug is missing" }, { status: 400 });
   }
 
   if (!title || typeof is_done !== "boolean") {
     console.error("POST: 요청 데이터가 유효하지 않습니다.");
 
-    return new Response("Invalid request body", { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 }
+    );
   }
 
   try {
@@ -94,7 +102,10 @@ export async function POST(
     if (!editedTodo) {
       console.error("POST: 수정할 할일을 찾을 수 없습니다.");
 
-      return new Response(null, { status: 204 });
+      return NextResponse.json(
+        { error: "할일을 찾을 수 없습니다." },
+        { status: 404 }
+      );
     }
 
     console.log("POST editedTodo:", editedTodo);
@@ -106,6 +117,9 @@ export async function POST(
   } catch (error) {
     console.error("POST: 서버 오류 발생", error);
 
-    return new Response("Internal Server Error", { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
