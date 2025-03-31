@@ -118,6 +118,9 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
         is_done: editedIsDone,
       });
 
+      // Firestore가 문서를 반영할 시간을 주기 위해 대기
+      await new Promise((resolve) => setTimeout(resolve, 600));
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/todos/${id}`,
         {
